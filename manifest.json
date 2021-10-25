@@ -1,0 +1,9 @@
+{
+	"filename": "OW_HardMode.dll",
+	"author": "PacificEngine",
+	"name": "Hard Mode",
+	"uniqueName": "PacificEngine.OW_HardMode",
+	"version": "0.1.0",
+	"owmlVersion": "2.1.0",
+	"enabled": true
+}
