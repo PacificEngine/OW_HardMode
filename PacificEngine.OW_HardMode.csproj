@@ -35,7 +35,7 @@
     <!--<OuterWildsModsDirectory>%AppData%\OuterWildsModManager\OWML\Mods</OuterWildsModsDirectory>-->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OWML" Version="2.0.0" />
+    <PackageReference Include="OWML" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">

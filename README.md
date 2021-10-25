@@ -1,5 +1,5 @@
--- Using the Mod
-All settings can be configured in settings.
+# Using the Mod
+All mod features can be configured in settings.
 
 Includes:
 * Shortening Loop Duration
@@ -10,8 +10,7 @@ Includes:
 * Adjusting Anglerfish Detection Distance
 * Adjusting Anglerfish Speed and Acceleration
 
--- Creating Code
-
+# Creating Code
 Create a new file called `Jose.CheatsMod.csproj`
 ```text/xml
 <?xml version="1.0" encoding="utf-8"?>
