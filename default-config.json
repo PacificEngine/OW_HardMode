@@ -44,6 +44,27 @@
       "value": 1,
       "min": 1,
       "max": 11
+    },
+    "Anglerfish Can Forget": {
+      "type": "toggle",
+      "value": true,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Can Forget"
+    },
+    "Anglerfish Can Smell": {
+      "type": "toggle",
+      "value": false,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Can Smell"
+    },
+    "Anglerfish Can See": {
+      "type": "toggle",
+      "value": false,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Can See"
     }
   }
 }

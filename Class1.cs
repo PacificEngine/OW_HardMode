@@ -67,9 +67,86 @@ namespace ClassLibrary2
             var anglerSpeedMultiplier = getConfigOrDefault<float>(config, "Anglerfish Speed Multiplier", 1f);
             var anglerDetectMultiplier = getConfigOrDefault<float>(config, "Anglerfish Detection Multiplier", 1f);
 
-            updateAnglerFish(anglerSpeedMultiplier, anglerDetectMultiplier);
+            Anglerfish.minimumState = getConfigOrDefault<bool>(config, "Anglerfish Can See", false) ? AnglerfishController.AnglerState.Chasing 
+                : getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false) ? AnglerfishController.AnglerState.Investigating 
+                : !getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true) ? AnglerfishController.AnglerState.Lurking 
+                : AnglerfishController.AnglerState.Stunned;
+
+            updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
 
             ModHelper.Console.WriteLine("Hard Mode: Configured!");
+        }
+
+        private float anglerFishSpeedAdjustment(float anglerSpeedMultiplier)
+        {
+            if (anglerSpeedMultiplier <= 5f)
+            {
+                return anglerSpeedMultiplier; // 1, 2, 3, 4, 5
+            }
+            else if (anglerSpeedMultiplier <= 6f)
+            {
+                return anglerSpeedMultiplier * 1.17f; // 7
+            }
+            else if (anglerSpeedMultiplier <= 7f)
+            {
+                return anglerSpeedMultiplier * 1.42f; // 10
+            }
+            else if (anglerSpeedMultiplier <= 8f)
+            {
+                return anglerSpeedMultiplier * 1.7f; // 14
+            }
+            else if (anglerSpeedMultiplier <= 9f)
+            {
+                return anglerSpeedMultiplier * 2f; // 18
+            }
+            else if (anglerSpeedMultiplier <= 10f)
+            {
+                return anglerSpeedMultiplier * 2.5f; // 25
+            }
+            else
+            {
+                return anglerSpeedMultiplier * 10f; // 110
+            }
+        }
+
+        private float anglerFishDistanceAdjustment(float anglerDetectMultiplier)
+        {
+            if (anglerDetectMultiplier <= 3f)
+            {
+                return anglerDetectMultiplier; // 1, 2, 3
+            }
+            else if (anglerDetectMultiplier <= 4f)
+            {
+                return anglerDetectMultiplier * 1.17f; // 5
+            }
+            else if (anglerDetectMultiplier <= 5f)
+            {
+                return anglerDetectMultiplier * 2f; // 10
+            }
+            else if (anglerDetectMultiplier <= 6f)
+            {
+                return anglerDetectMultiplier * 4f; // 25
+            }
+            else if (anglerDetectMultiplier <= 7f)
+            {
+                return anglerDetectMultiplier * 7f; // 50
+            }
+            else if (anglerDetectMultiplier <= 8f)
+            {
+                return anglerDetectMultiplier * 12.5f; // 100
+            }
+            else if (anglerDetectMultiplier <= 9f)
+            {
+                return anglerDetectMultiplier * 50f; // 450
+            }
+            else if (anglerDetectMultiplier <= 10f)
+            {
+                return anglerDetectMultiplier * 100f; // 1000
+            }
+            else
+            {
+                return anglerDetectMultiplier * 1000f; // 11000
+            }
         }
 
         void OnGUI()

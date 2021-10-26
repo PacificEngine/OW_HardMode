@@ -44,6 +44,27 @@
       "value": 1,
       "min": 1,
       "max": 11
+    },
+    "Anglerfish Stunnable": {
+      "type": "toggle",
+      "value": true,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Stunnable"
+    },
+    "Anglerfish Always Focused": {
+      "type": "toggle",
+      "value": false,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Always Focused"
+    },
+    "Anglerfish Always Chase": {
+      "type": "toggle",
+      "value": false,
+      "yes": "Enabled",
+      "no": "Disabled",
+      "title": "Anglerfish Always Chase"
     }
   }
 }
