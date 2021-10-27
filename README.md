@@ -9,6 +9,9 @@ Includes:
 * Disabling the Ship
 * Adjusting Anglerfish Detection Distance
 * Adjusting Anglerfish Speed and Acceleration
+* Preventing Anglerfish from getting Stunned
+* Giving Anglerfish the ability to smell you or your ship
+* Giving Anglerfish the ability see you or your ship (Good luck!)
 
 # Creating Code
 Create a new file called `Jose.CheatsMod.csproj`
