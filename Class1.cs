@@ -20,14 +20,14 @@ namespace ClassLibrary2
             if (isEnabled)
             {
                 ModHelper.Events.Player.OnPlayerAwake += (player) => onAwake();
-                Anglerfish.Start();
+                Anglerfish.Start((ModHelper)ModHelper);
                 ModHelper.Console.WriteLine("Hard Mode: ready!");
             }
         }
 
         void Destory()
         {
-            Anglerfish.Destory();
+            Anglerfish.Destroy((ModHelper)ModHelper);
             ModHelper.Console.WriteLine("Hard Mode: clean up!");
         }
 
@@ -67,10 +67,9 @@ namespace ClassLibrary2
             var anglerSpeedMultiplier = getConfigOrDefault<float>(config, "Anglerfish Speed Multiplier", 1f);
             var anglerDetectMultiplier = getConfigOrDefault<float>(config, "Anglerfish Detection Multiplier", 1f);
 
-            Anglerfish.minimumState = getConfigOrDefault<bool>(config, "Anglerfish Can See", false) ? AnglerfishController.AnglerState.Chasing 
-                : getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false) ? AnglerfishController.AnglerState.Investigating 
-                : !getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true) ? AnglerfishController.AnglerState.Lurking 
-                : AnglerfishController.AnglerState.Stunned;
+            Anglerfish.canStun = getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true);
+            Anglerfish.canSmell = getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false);
+            Anglerfish.canSee = getConfigOrDefault<bool>(config, "Anglerfish Can See", false);
 
             updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
 
@@ -184,6 +183,9 @@ namespace ClassLibrary2
             Anglerfish.chaseSpeed = 42f * speedMultiplier;
             Anglerfish.turnSpeed = 100f * speedMultiplier;
             Anglerfish.quickTurnSpeed = 360f * speedMultiplier;
+
+            Anglerfish.visionDistance = 200f * detectMultiplier;
+            Anglerfish.smellDistance = 500f * detectMultiplier;
         }
 
         private void updateHealth(float damageMultiplier)

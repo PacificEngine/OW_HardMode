@@ -3,7 +3,7 @@
 	"author": "PacificEngine",
 	"name": "Hard Mode",
 	"uniqueName": "PacificEngine.OW_HardMode",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"owmlVersion": "2.1.0",
 	"enabled": true
 }

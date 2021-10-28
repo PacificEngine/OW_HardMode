@@ -9,127 +9,207 @@ using UnityEngine.InputSystem;
 
 namespace ClassLibrary2
 {
+    class AnglerfishHelper
+    {
+        private static bool Awake(ref AnglerfishController __instance)
+        {
+            Anglerfish.anglerfish.Add(__instance);
+            Anglerfish.updateAnglerfish(__instance);
+            return true;
+        }
+
+        private static bool OnDestroy(ref AnglerfishController __instance)
+        {
+            Anglerfish.anglerfish.Remove(__instance);
+            return true;
+        }
+
+        private static bool onFeel(ref ImpactData impact)
+        {
+            if (!Anglerfish.canFeel)
+            {
+                var attachedOwRigidbody = impact.otherCollider.GetAttachedOWRigidbody();
+                if ((attachedOwRigidbody.CompareTag("Player") || attachedOwRigidbody.CompareTag("Ship")))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool onHearSound(ref NoiseMaker noiseMaker)
+        {
+            return Anglerfish.canHear;
+        }
+    }
+
     static class Anglerfish
     {
-        private static bool _enabledAI = true;
-        private static AnglerfishController.AnglerState _minimumState = AnglerfishController.AnglerState.Stunned;
-        private static float _acceleration = 2f;
-        private static float _investigateSpeed = 20f;
-        private static float _chaseSpeed = 42f;
-        private static float _turnSpeed = 180f;
-        private static float _quickTurnSpeed = 360f;
-        private static float _mouthOpenDistance = 100f;
-        private static float _pursueDistance = 200f;
-        private static float _escapeDistance = 500f;
+        public static HashSet<AnglerfishController> anglerfish = new HashSet<AnglerfishController>();
 
-        public static bool enabledAI { get { return _enabledAI; } set { _enabledAI = value; updateAnglerfish(); } }
-        public static AnglerfishController.AnglerState minimumState { get { return _minimumState; } set { _minimumState = value; updateAnglerfish(); } }
-        public static float acceleration { get { return _acceleration; } set { _acceleration = value; updateAnglerfish(); } }
-        public static float investigateSpeed { get { return _investigateSpeed; } set { _investigateSpeed = value; updateAnglerfish(); } }
-        public static float chaseSpeed { get { return _chaseSpeed; } set { _chaseSpeed = value; updateAnglerfish(); } }
-        public static float turnSpeed { get { return _turnSpeed; } set { _turnSpeed = value; updateAnglerfish(); } }
-        public static float quickTurnSpeed { get { return _quickTurnSpeed; } set { _quickTurnSpeed = value; updateAnglerfish(); } }
-        public static float mouthOpenDistance { get { return _mouthOpenDistance; } set { _mouthOpenDistance = value; updateAnglerfish(); } }
-        public static float pursueDistance { get { return _pursueDistance; } set { _pursueDistance = value; updateAnglerfish(); } }
-        public static float escapeDistance { get { return _escapeDistance; } set { _escapeDistance = value; updateAnglerfish(); } }
+        private static ModHelper _helper;
 
-        public static void Start()
+        private static bool? _enabledAI = null;
+        private static bool _canStun = true;
+        private static bool _canFeel = true;
+        private static bool _canHear = true;
+        private static bool _canSmell = false;
+        private static bool _canSee = false;
+        private static float? _overrideAcceleration = null;
+        private static float? _overrideInvestigateSpeed = null;
+        private static float? _overrideChaseSpeed = null;
+        private static float? _overrideTurnSpeed = null;
+        private static float? _overrideQuickTurnSpeed = null;
+        private static float? _overrideMouthOpenDistance = null;
+        private static float? _overridePursueDistance = null;
+        private static float? _overrideEscapeDistance = null;
+
+        private static float _visionX = 180f;
+        private static float _visionY = 100f;
+        private static float _visionYoffset = 45f;
+        private static float _visionDistance = 200f;
+        private static float _smellDistance = 500f;
+
+        public static bool? enabledAI { get { return _enabledAI.GetValueOrDefault(true); } set { _enabledAI = value; updateAnglerfish(); } }
+        public static bool canStun { get { return _canStun; } set { _canStun = value; } }
+        public static bool canFeel { get { return _canFeel; } set { _canFeel = value; } }
+        public static bool canHear { get { return _canHear; } set { _canHear = value; } }
+        public static bool canSmell { get { return _canSmell; } set { _canSmell = value; } }
+        public static bool canSee { get { return _canSee; } set { _canSee = value; } }
+        public static float? acceleration { get { return _overrideAcceleration.GetValueOrDefault(getParameter("_acceleration", 2f)); } set { _overrideAcceleration = value; updateParameter("_acceleration", value, 2f); } }
+        public static float? investigateSpeed { get { return _overrideInvestigateSpeed.GetValueOrDefault(getParameter("_investigateSpeed", 20f)); } set { _overrideInvestigateSpeed = value; updateParameter("_investigateSpeed", value, 20f); } }
+        public static float? chaseSpeed { get { return _overrideChaseSpeed.GetValueOrDefault(getParameter("_chaseSpeed", 42f)); } set { _overrideChaseSpeed = value; updateParameter("_chaseSpeed", value, 42f); } }
+        public static float? turnSpeed { get { return _overrideTurnSpeed.GetValueOrDefault(getParameter("_turnSpeed", 180f)); } set { _overrideTurnSpeed = value; updateParameter("_turnSpeed", value, 180f); } }
+        public static float? quickTurnSpeed { get { return _overrideQuickTurnSpeed.GetValueOrDefault(getParameter("_quickTurnSpeed", 360f)); } set { _overrideQuickTurnSpeed = value; updateParameter("_quickTurnSpeed", value, 360f); } }
+        public static float? mouthOpenDistance { get { return _overrideMouthOpenDistance.GetValueOrDefault(getParameter("_arrivalDistance", 100f)); } set { _overrideMouthOpenDistance = value; updateParameter("_arrivalDistance", value, 100f); } }
+        public static float? pursueDistance { get { return _overridePursueDistance.GetValueOrDefault(getParameter("_pursueDistance", 200f)); } set { _overridePursueDistance = value; updateParameter("_pursueDistance", value, 200f); } }
+        public static float? escapeDistance { get { return _overrideEscapeDistance.GetValueOrDefault(getParameter("_escapeDistance", 500f)); } set { _overrideEscapeDistance = value; updateParameter("_escapeDistance", value, 500f); } }
+
+        public static float? visionX { get { return _visionX; } set { _visionX = value.GetValueOrDefault(180f); } }
+        public static float? visionY { get { return _visionY; } set { _visionY = value.GetValueOrDefault(100f); } }
+        public static float? visionYoffset { get { return _visionYoffset; } set { _visionYoffset = value.GetValueOrDefault(45f); } }
+        public static float? visionDistance { get { return _visionDistance; } set { _visionDistance = value.GetValueOrDefault(200f); } }
+        public static float? smellDistance { get { return _smellDistance; } set { _smellDistance = value.GetValueOrDefault(500f); } }
+
+        public static void Start(ModHelper helper)
         {
+            _helper = helper;
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("Awake", typeof(AnglerfishHelper), "Awake");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnDestroy", typeof(AnglerfishHelper), "OnDestroy");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnImpact", typeof(AnglerfishHelper), "onFeel");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnClosestAudibleNoise", typeof(AnglerfishHelper), "onHearSound");
         }
 
         public static void Awake()
         {
-            foreach (Sector sector in SectorManager.GetRegisteredSectors())
-            {
-                if (Sector.Name.BrambleDimension.Equals(sector.GetName()))
-                {
-                    sector.OnSectorOccupantsUpdated.AddListener(() => updateAnglerfish(UnityEngine.Object.FindObjectsOfType<AnglerfishController>()));
-                }
-            }
+            
         }
 
-        public static void Destory()
+        public static void Destroy(ModHelper helper)
         {
         }
 
         public static void Update()
         {
-        }
+            foreach (AnglerfishController anglerfishController in anglerfish)
+            {
+                updateAnglerfish(anglerfishController);
+                if (!canStun)
+                {
+                    updateParameter(anglerfishController, "_stunTimer", 0f);
+                }
 
-        public static void onEnter()
-        {
-        }
+                if (anglerfishController.isActiveAndEnabled)
+                {
+                    if (canSmell && (anglerfishController.GetAnglerState() == AnglerfishController.AnglerState.Investigating || anglerfishController.GetAnglerState() == AnglerfishController.AnglerState.Lurking))
+                    {
+                        var distance = Locator.GetPlayerBody().GetPosition() - anglerfishController.transform.position;
+                        var bramble = getParameter<OWRigidbody>(anglerfishController, "_brambleBody");
 
-        public static void onLeave()
-        {
-        }
+                        if (distance.magnitude < _smellDistance)
+                        {
+                            anglerfishController.SetValue("_localDisturbancePos", bramble.transform.InverseTransformPoint(getPlayerBody().GetPosition()));
+                            anglerfishController.Invoke("ChangeState", AnglerfishController.AnglerState.Investigating);
+                        }
+                    }
+                    if (canSee && (anglerfishController.GetAnglerState() == AnglerfishController.AnglerState.Investigating || anglerfishController.GetAnglerState() == AnglerfishController.AnglerState.Lurking))
+                    {
+                        var distance = Locator.GetPlayerBody().GetPosition() - anglerfishController.transform.position;
+                        var xAngle = Vector3.Angle(distance, anglerfishController.transform.forward);
+                        var yAngle = Vector3.Angle(distance, anglerfishController.transform.up) - _visionYoffset;
 
-        private static void updateAnglerfish(params AnglerfishController[] anglerfishControllers)
-        {
-            foreach (AnglerfishController anglerfishController in anglerfishControllers)
-            {
-                updateAnglerfish(anglerfishController, anglerfishController.GetValue<AnglerfishController.AnglerState>("_currentState"));
-                anglerfishController.OnAnglerUnsuspended += (state) => updateAnglerfish(anglerfishController, state);
-                anglerfishController.OnChangeAnglerState += (state) => updateAnglerfish(anglerfishController, state);
-            }
-        }
-
-        private static void updateAnglerfish(AnglerfishController anglerfishController, AnglerfishController.AnglerState state)
-        {
-            //anglerfishController.enabled = enabledAI;
-            anglerfishController.SetValue("_acceleration", acceleration);
-            anglerfishController.SetValue("_investigateSpeed", investigateSpeed);
-            anglerfishController.SetValue("_chaseSpeed", chaseSpeed);
-            anglerfishController.SetValue("_turnSpeed", turnSpeed);
-            anglerfishController.SetValue("_quickTurnSpeed", quickTurnSpeed);
-            anglerfishController.SetValue("_arrivalDistance", mouthOpenDistance);
-            anglerfishController.SetValue("_pursueDistance", pursueDistance);
-            anglerfishController.SetValue("_escapeDistance", escapeDistance);
-
-            updateAnglerfishState(anglerfishController, anglerfishController.GetValue<AnglerfishController.AnglerState>("_currentState"));
-        }
-
-        private static void updateAnglerfishState(AnglerfishController anglerfishController, AnglerfishController.AnglerState state)
-        {
-            if (minimumState == AnglerfishController.AnglerState.Stunned)
-            {
-                return;
-            }
-            else if (state == AnglerfishController.AnglerState.Stunned)
-            {
-                setAnglerfishState(anglerfishController, minimumState);
-            }
-            else if (minimumState == AnglerfishController.AnglerState.Lurking)
-            {
-                return;
-            }
-            else if (state == AnglerfishController.AnglerState.Lurking)
-            {
-                setAnglerfishState(anglerfishController, minimumState);
-            }
-            else if (minimumState == AnglerfishController.AnglerState.Investigating)
-            {
-                return;
-            }
-            else if (state == AnglerfishController.AnglerState.Investigating)
-            {
-                setAnglerfishState(anglerfishController, minimumState);
+                        if (distance.magnitude <= _visionDistance && (xAngle * 2) <= _visionX && 0 <= yAngle && yAngle <= _visionY)
+                        {
+                            anglerfishController.SetValue("_targetBody", getPlayerBody());
+                            anglerfishController.Invoke("ChangeState", AnglerfishController.AnglerState.Chasing);
+                        }
+                    }
+                }
             }
         }
 
-        private static void setAnglerfishState(AnglerfishController anglerfishController, AnglerfishController.AnglerState state)
+        private static void updateAnglerfish()
         {
-            if (state == AnglerfishController.AnglerState.Investigating)
+            foreach (AnglerfishController anglerfishController in anglerfish)
             {
-                var bramble = anglerfishController.GetValue<OWRigidbody>("_brambleBody");
-                anglerfishController.SetValue("_localDisturbancePos", bramble.transform.TransformPoint(Locator.GetPlayerBody().GetPosition()));
+                updateAnglerfish(anglerfishController);
             }
+        }
 
-            if (state == AnglerfishController.AnglerState.Chasing)
+        public static void updateAnglerfish(AnglerfishController anglerfishController)
+        {
+            if (enabledAI != null)
+                anglerfishController.enabled = enabledAI.Value;
+            updateParameter(anglerfishController, "_acceleration", _overrideAcceleration);
+            updateParameter(anglerfishController, "_investigateSpeed", _overrideInvestigateSpeed);
+            updateParameter(anglerfishController, "_chaseSpeed", _overrideChaseSpeed);
+            updateParameter(anglerfishController, "_turnSpeed", _overrideTurnSpeed);
+            updateParameter(anglerfishController, "_quickTurnSpeed", _overrideQuickTurnSpeed);
+            updateParameter(anglerfishController, "_arrivalDistance", _overrideMouthOpenDistance);
+            updateParameter(anglerfishController, "_pursueDistance", _overridePursueDistance);
+            updateParameter(anglerfishController, "_escapeDistance", _overrideEscapeDistance);
+        }
+
+        private static OWRigidbody getPlayerBody()
+        {
+            if (PlayerState.IsInsideShip())
             {
-                anglerfishController.SetValue("_targetBody", Locator.GetPlayerBody());
+                return Locator.GetShipBody();
             }
-            anglerfishController.SetValue("_currentState", state);
+            else
+            {
+                return Locator.GetPlayerBody();
+            }
+        }
+
+        private static void updateParameter(string id, float? parameter, float defaultValue)
+        {
+            foreach (AnglerfishController anglerfishController in anglerfish)
+            {
+                anglerfishController.SetValue(id, parameter == null ? defaultValue : parameter);
+            }
+        }
+
+        private static void updateParameter(AnglerfishController anglerfishController, string id, float? parameter)
+        {
+            if (parameter != null)
+            {
+                anglerfishController.SetValue(id, parameter);
+            }
+        }
+
+        private static T getParameter<T>(string id, T defaultValue)
+        {
+            foreach (AnglerfishController anglerfishController in anglerfish)
+            {
+                return getParameter<T>(anglerfishController, id);
+            }
+            return defaultValue;
+        }
+
+        private static T getParameter<T>(AnglerfishController anglerfishController, string id)
+        {
+            return anglerfishController.GetValue<T>(id);
         }
     }
 }
