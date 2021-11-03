@@ -89,11 +89,42 @@ namespace ClassLibrary2
             return Anglerfish.canHear;
         }
 
-        private static bool IsLightVisible(ref FogLight.LightData lightData, ref bool __result)
+        /*private static bool IsLightVisible(ref FogLight.LightData lightData, ref bool __result)
         {
             __result = true;
             return false;
         }
+
+        private static bool DetermineFogVisibilityToPlayer(ref CanvasMarker __instance)
+        {
+            __instance.enabled = true;
+            __instance.SetVisibility(true);
+            __instance.SetFogVisibility(true);
+            return false;
+        }
+
+
+        private static bool SetFogVisibility(ref bool value)
+        {
+            value = true;
+            return true;
+        }
+
+
+        private static bool SetVisibility(ref bool value)
+        {
+            value = true;
+            return true;
+        }
+
+        private static bool AwakeOuterFogWarpVolume(ref OuterFogWarpVolume __instance)
+        {
+            var values = Enum.GetValues(typeof(OuterFogWarpVolume.Name));
+            var random = new System.Random();
+            var randomValue = (OuterFogWarpVolume.Name)values.GetValue(random.Next(values.Length));
+            __instance.SetValue("_name", randomValue);
+            return true;
+        }*/
     }
 
     static class Anglerfish
@@ -157,7 +188,11 @@ namespace ClassLibrary2
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnDestroy", typeof(AnglerfishHelper), "OnDestroy");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnImpact", typeof(AnglerfishHelper), "onFeel");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnClosestAudibleNoise", typeof(AnglerfishHelper), "onHearSound");
-            helper.HarmonyHelper.AddPrefix<FogLightManager>("IsLightVisible", typeof(AnglerfishHelper), "IsLightVisible");
+            /*helper.HarmonyHelper.AddPrefix<FogLightManager>("IsLightVisible", typeof(AnglerfishHelper), "IsLightVisible");
+            helper.HarmonyHelper.AddPrefix<CanvasMarker>("DetermineFogVisibilityToPlayer", typeof(AnglerfishHelper), "DetermineFogVisibilityToPlayer");
+            helper.HarmonyHelper.AddPrefix<CanvasMarker>("SetFogVisibility", typeof(AnglerfishHelper), "SetFogVisibility");
+            helper.HarmonyHelper.AddPrefix<CanvasMarker>("SetVisibility", typeof(AnglerfishHelper), "SetVisibility");
+            helper.HarmonyHelper.AddPrefix<OuterFogWarpVolume>("OnAwake", typeof(AnglerfishHelper), "AwakeOuterFogWarpVolume");*/
         }
 
         public static void Awake()
@@ -176,11 +211,26 @@ namespace ClassLibrary2
                 var parent = Locator.GetAstroObject(AstroObject.Name.TimberHearth)?.GetAttachedOWRigidbody();
                 if (parent)
                 {
-                    var controller = AnglerfishController.Instantiate(anglerfishController, parent.GetPosition() + new Vector3(0f, 380f, 0f), Quaternion.identity, parent.transform);
+                    var controller = AnglerfishController.Instantiate(anglerfishController, parent.GetPosition() + new Vector3(0f, 300f, 0f), Quaternion.identity, parent.transform);
                     controller.GetAttachedOWRigidbody().SetVelocity(parent.GetVelocity());
                     controller.SetValue("_brambleBody", parent);
                     controller.SetSector((SectorHelper.getSector(Sector.Name.TimberHearth) ?? SectorManager.GetRegisteredSectors())[0].GetRootSector());
                     createdAnglerfish.Add(controller);
+
+                    if (controller.gameObject.GetCullGroup())
+                    {
+                        _helper.Console.WriteLine("anglerfish-c1" + controller.gameObject.GetCullGroup());
+                    }
+
+                    if (controller.gameObject.GetLightsCullGroup())
+                    {
+                        _helper.Console.WriteLine("anglerfish-c2" + controller.gameObject.GetLightsCullGroup());
+                    }
+
+                    if (controller.gameObject.GetCollisionGroup())
+                    {
+                        _helper.Console.WriteLine("anglerfish-c3" + controller.gameObject.GetCollisionGroup());
+                    }
                 }
 
                 /* controller.GetComponentsInChildren<object>()
@@ -352,16 +402,44 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
         {
             SetVisibleBehaviour(item, visible);
             SetVisibleChild(item, visible, collision);
+            //item.GetComponent<AnglerfishAnimController>().GetComponent<Animator>().enabled = true;
+            /*foreach (Component sibling in item.GetComponents<Component>())
+            {
+                SetVisibleChild(sibling, visible, collision);
+                foreach (Component niece in item.GetComponentsInChildren<Component>())
+                {
+                    SetVisibleChild(niece, visible, collision);
+                }
+            }*/
             foreach (Component child in item.GetComponentsInChildren<Component>())
             {
                 SetVisibleChild(child, visible, collision);
+                /*foreach (Component grandchild in child.GetComponentsInChildren<Component>())
+                {
+                    SetVisibleChild(grandchild, visible, collision);
+                }*/
             }
+            /*foreach (FogWarpDetector detector in GameObject.FindObjectsOfType<FogWarpDetector>())
+            {
+                SetVisibleBehaviour(detector, visible);
+            }
+            foreach (OuterFogWarpVolume volume in GameObject.FindObjectsOfType<OuterFogWarpVolume>())
+            {
+                SetVisibleBehaviour(volume, visible);
+            }*/
         }
 
         private static void SetVisibleChild(Component item, bool visible, bool collision)
         {
-            SetVisibleComponent(item, visible);
-            foreach (OWCollider collider in item.GetComponentsInChildren<OWCollider>())
+            if (item is Behaviour)
+            {
+                SetVisibleBehaviour((Behaviour)item, visible);
+            }
+            else
+            {
+                SetVisibleComponent(item, visible);
+            }
+            foreach (OWCollider collider in item.GetComponents<OWCollider>())
             {
                 SetVisibleBehaviour(collider, visible);
                 collider.SetActivation(true);
@@ -372,12 +450,12 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
                     SetVisibleComponent(collider, visible);
                 }
             }
-            foreach (Collider collider in item.GetComponentsInChildren<Collider>())
+            foreach (Collider collider in item.GetComponents<Collider>())
             {
                 collider.enabled = collision;
                 SetVisibleComponent(collider, visible);
             }
-            foreach (OWRenderer render in item.GetComponentsInChildren<OWRenderer>())
+            foreach (OWRenderer render in item.GetComponents<OWRenderer>())
             {
                 SetVisibleBehaviour(render, visible);
                 render.SetActivation(true);
@@ -388,12 +466,12 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
                     SetVisibleComponent(render, visible);
                 }
             }
-            foreach (Renderer render in item.GetComponentsInChildren<Renderer>())
+            foreach (Renderer render in item.GetComponents<Renderer>())
             {
                 render.enabled = true;
                 SetVisibleComponent(render, visible);
             }
-            foreach (ParticleSystem particleSystem in item.GetComponentsInChildren<ParticleSystem>())
+            foreach (ParticleSystem particleSystem in item.GetComponents<ParticleSystem>())
             {
                 SetVisibleComponent(particleSystem, visible);
                 if (visible)
@@ -401,7 +479,7 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
                 else
                     particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
-            foreach (OWLight2 light in item.GetComponentsInChildren<OWLight2>())
+            foreach (OWLight2 light in item.GetComponents<OWLight2>())
             {
                 SetVisibleBehaviour(light, visible);
                 light.SetActivation(true);
@@ -411,15 +489,15 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
                     SetVisibleBehaviour(light.GetLight(), visible);
                 }
             }
-            foreach (Light light in item.GetComponentsInChildren<Light>())
+            foreach (Light light in item.GetComponents<Light>())
             {
                 SetVisibleBehaviour(light, visible);
             }
-            foreach(LightLOD light in item.GetComponentsInChildren<LightLOD>())
+            foreach(LightLOD light in item.GetComponents<LightLOD>())
             {
                 SetVisibleBehaviour(light, visible);
             }
-            foreach (FogLight light in item.GetComponentsInChildren<FogLight>())
+            foreach (FogLight light in item.GetComponents<FogLight>())
             {
                 SetVisibleBehaviour(light, visible);
             }
@@ -440,7 +518,6 @@ parentFogLight_FishEgg (FogLight)	Hard Mode
             if (visible)
             {
                 item.GetAttachedOWRigidbody().Unsuspend();
-                item.GetAttachedOWRigidbody().Invoke("UnsuspendImmediate", true);
             }
             else
             {
