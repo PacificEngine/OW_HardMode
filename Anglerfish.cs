@@ -11,16 +11,63 @@ namespace ClassLibrary2
 {
     class AnglerfishHelper
     {
+        private static void Start(ref AnglerfishController __instance)
+        {
+            //Anglerfish.createAnglerfish(__instance);
+        }
+
         private static bool Awake(ref AnglerfishController __instance)
         {
             Anglerfish.anglerfish.Add(__instance);
             Anglerfish.updateAnglerfish(__instance);
+            Anglerfish._helper?.Console?.WriteLine("Anglerfish Awaken");
             return true;
         }
+
+        private static bool OnSectorOccupantsUpdated(ref AnglerfishController __instance)
+        {
+            if (Anglerfish.createdAnglerfish.Contains(__instance))
+            {
+                Anglerfish._helper?.Console?.WriteLine("Update");
+            }
+            return !Anglerfish.createdAnglerfish.Contains(__instance);
+        }
+
+
+        private static bool OnSectorOccupantAdded(ref AnglerfishController __instance)
+        {
+            if (Anglerfish.createdAnglerfish.Contains(__instance))
+            {
+                Anglerfish._helper?.Console?.WriteLine("Added");
+            }
+            return !Anglerfish.createdAnglerfish.Contains(__instance);
+        }
+
+        private static bool OnSectorOccupantRemoved(ref AnglerfishController __instance)
+        {
+            if (Anglerfish.createdAnglerfish.Contains(__instance))
+            {
+                Anglerfish._helper?.Console?.WriteLine("Remove");
+            }
+            return !Anglerfish.createdAnglerfish.Contains(__instance);
+        }
+
+        private static bool SetSector(ref Sector sector, ref AnglerfishController __instance)
+        {
+            if (sector != null)
+                Anglerfish._helper?.Console?.WriteLine("SetSector");
+            if (Anglerfish.createdAnglerfish.Contains(__instance))
+            {
+                //sector = null;
+            }
+            return true;
+        }
+
 
         private static bool OnDestroy(ref AnglerfishController __instance)
         {
             Anglerfish.anglerfish.Remove(__instance);
+            Anglerfish.createdAnglerfish.Remove(__instance);
             return true;
         }
 
@@ -41,18 +88,25 @@ namespace ClassLibrary2
         {
             return Anglerfish.canHear;
         }
+
+        private static bool IsLightVisible(ref FogLight.LightData lightData, ref bool __result)
+        {
+            __result = true;
+            return false;
+        }
     }
 
     static class Anglerfish
     {
         public static HashSet<AnglerfishController> anglerfish = new HashSet<AnglerfishController>();
+        public static HashSet<AnglerfishController> createdAnglerfish = new HashSet<AnglerfishController>();
 
-        private static ModHelper _helper;
+        public static ModHelper _helper;
 
         private static bool? _enabledAI = null;
         private static bool _canStun = true;
-        private static bool _canFeel = true;
-        private static bool _canHear = true;
+        private static bool _canFeel = false;
+        private static bool _canHear = false;
         private static bool _canSmell = false;
         private static bool _canSee = false;
         private static float? _overrideAcceleration = null;
@@ -94,26 +148,108 @@ namespace ClassLibrary2
         public static void Start(ModHelper helper)
         {
             _helper = helper;
+            helper.HarmonyHelper.AddPostfix<AnglerfishController>("Start", typeof(AnglerfishHelper), "Start");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("Awake", typeof(AnglerfishHelper), "Awake");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnSectorOccupantAdded", typeof(AnglerfishHelper), "OnSectorOccupantAdded");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnSectorOccupantsUpdated", typeof(AnglerfishHelper), "OnSectorOccupantsUpdated");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnSectorOccupantRemoved", typeof(AnglerfishHelper), "OnSectorOccupantRemoved");
+            helper.HarmonyHelper.AddPrefix<AnglerfishController>("SetSector", typeof(AnglerfishHelper), "SetSector");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnDestroy", typeof(AnglerfishHelper), "OnDestroy");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnImpact", typeof(AnglerfishHelper), "onFeel");
             helper.HarmonyHelper.AddPrefix<AnglerfishController>("OnClosestAudibleNoise", typeof(AnglerfishHelper), "onHearSound");
+            helper.HarmonyHelper.AddPrefix<FogLightManager>("IsLightVisible", typeof(AnglerfishHelper), "IsLightVisible");
         }
 
         public static void Awake()
         {
-            
         }
 
         public static void Destroy(ModHelper helper)
         {
+
+        }
+
+        public static void createAnglerfish(AnglerfishController anglerfishController)
+        {
+            if (anglerfishController.enabled && createdAnglerfish.Count == 0 && Time.timeSinceLevelLoad > 1f)
+            {
+                var parent = Locator.GetAstroObject(AstroObject.Name.TimberHearth)?.GetAttachedOWRigidbody();
+                if (parent)
+                {
+                    var controller = AnglerfishController.Instantiate(anglerfishController, parent.GetPosition() + new Vector3(0f, 380f, 0f), Quaternion.identity, parent.transform);
+                    controller.GetAttachedOWRigidbody().SetVelocity(parent.GetVelocity());
+                    controller.SetValue("_brambleBody", parent);
+                    controller.SetSector((SectorHelper.getSector(Sector.Name.TimberHearth) ?? SectorManager.GetRegisteredSectors())[0].GetRootSector());
+                    createdAnglerfish.Add(controller);
+                }
+
+                /* controller.GetComponentsInChildren<object>()
+                 * Anglerfish_Body(Clone) (OWRigidbody)	Hard Mode	
+Anglerfish_Body(Clone) (MatchInitialMotion)	Hard Mode	
+Anglerfish_Body(Clone) (AnglerfishController)	Hard Mode	
+Anglerfish_Body(Clone) (ImpactSensor)	Hard Mode	
+Anglerfish_Body(Clone) (NoiseSensor)	Hard Mode	
+Anglerfish_Body(Clone) (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+AudioController (AnglerfishAudioController)	Hard Mode	
+LoopSource (OWAudioSource)	Hard Mode	
+OneShotSource (OWAudioSource)	Hard Mode	
+OneShotSource_LongRange (OWAudioSource)	Hard Mode	
+JawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+JawsOfDestruction (OWCollider)	Hard Mode	
+JawsOfDestruction (OWTriggerVolume)	Hard Mode	
+Beast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+Lure_PointLight (LightLOD)	Hard Mode	
+Lure_FogLight (FogLight)	Hard Mode	
+Beast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+Beast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+Beast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+Beast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+Beast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+Beast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode
+                */
+            }
         }
 
         public static void Update()
         {
+            if (createdAnglerfish.Count == 0 && anglerfish.Count > 0)
+            {
+                var i = anglerfish.GetEnumerator();
+                i.MoveNext();
+                createAnglerfish(i.Current);
+            }
+            foreach (AnglerfishController anglerfishController in createdAnglerfish)
+            {
+                SetVisible(anglerfishController, true, true);
+            }
             foreach (AnglerfishController anglerfishController in anglerfish)
             {
                 updateAnglerfish(anglerfishController);
+                /*
+                 * anglerfishAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfishAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfishAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfishAnglerfish_Body (NoiseSensor)	Hard Mode
+anglerfishAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfishAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfishLoopSource (OWAudioSource)	Hard Mode	
+anglerfishOneShotSource (OWAudioSource)	Hard Mode	
+anglerfishOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfishJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfishJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfishJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfishBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfishLure_PointLight (LightLOD)	Hard Mode	
+anglerfishLure_FogLight (FogLight)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+parentFogLight_FishEgg (FogLight)	Hard Mode
+                 */
+
                 if (!canStun)
                 {
                     updateParameter(anglerfishController, "_stunTimer", 0f);
@@ -186,7 +322,7 @@ namespace ClassLibrary2
         {
             foreach (AnglerfishController anglerfishController in anglerfish)
             {
-                anglerfishController.SetValue(id, parameter.GetValueOrDefault(defaultValue));
+                updateParameter(anglerfishController, id, parameter.GetValueOrDefault(defaultValue));
             }
         }
 
@@ -211,5 +347,416 @@ namespace ClassLibrary2
         {
             return anglerfishController.GetValue<T>(id);
         }
+
+        private static void SetVisible(AnglerfishController item, bool visible, bool collision)
+        {
+            SetVisibleBehaviour(item, visible);
+            SetVisibleChild(item, visible, collision);
+            foreach (Component child in item.GetComponentsInChildren<Component>())
+            {
+                SetVisibleChild(child, visible, collision);
+            }
+        }
+
+        private static void SetVisibleChild(Component item, bool visible, bool collision)
+        {
+            SetVisibleComponent(item, visible);
+            foreach (OWCollider collider in item.GetComponentsInChildren<OWCollider>())
+            {
+                SetVisibleBehaviour(collider, visible);
+                collider.SetActivation(true);
+                collider.SetLODLevel(collision ? 0 : 1, 0f);
+                if (collider.GetCollider())
+                {
+                    collider.GetCollider().enabled = collision;
+                    SetVisibleComponent(collider, visible);
+                }
+            }
+            foreach (Collider collider in item.GetComponentsInChildren<Collider>())
+            {
+                collider.enabled = collision;
+                SetVisibleComponent(collider, visible);
+            }
+            foreach (OWRenderer render in item.GetComponentsInChildren<OWRenderer>())
+            {
+                SetVisibleBehaviour(render, visible);
+                render.SetActivation(true);
+                render.SetLODActivation(visible);
+                if (render.GetRenderer())
+                {
+                    render.GetRenderer().enabled = true;
+                    SetVisibleComponent(render, visible);
+                }
+            }
+            foreach (Renderer render in item.GetComponentsInChildren<Renderer>())
+            {
+                render.enabled = true;
+                SetVisibleComponent(render, visible);
+            }
+            foreach (ParticleSystem particleSystem in item.GetComponentsInChildren<ParticleSystem>())
+            {
+                SetVisibleComponent(particleSystem, visible);
+                if (visible)
+                    particleSystem.Play(true);
+                else
+                    particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+            foreach (OWLight2 light in item.GetComponentsInChildren<OWLight2>())
+            {
+                SetVisibleBehaviour(light, visible);
+                light.SetActivation(true);
+                light.SetLODActivation(visible);
+                if (light.GetLight())
+                {
+                    SetVisibleBehaviour(light.GetLight(), visible);
+                }
+            }
+            foreach (Light light in item.GetComponentsInChildren<Light>())
+            {
+                SetVisibleBehaviour(light, visible);
+            }
+            foreach(LightLOD light in item.GetComponentsInChildren<LightLOD>())
+            {
+                SetVisibleBehaviour(light, visible);
+            }
+            foreach (FogLight light in item.GetComponentsInChildren<FogLight>())
+            {
+                SetVisibleBehaviour(light, visible);
+            }
+        }
+
+
+        private static void SetVisibleBehaviour(Behaviour item, bool visible)
+        {
+            item.enabled = true;
+            SetVisibleComponent(item, visible);
+        }
+
+        private static void SetVisibleComponent(Component item, bool visible)
+        {
+            item.gameObject.SetActive(true);
+            item.GetAttachedOWRigidbody().enabled = true;
+
+            if (visible)
+            {
+                item.GetAttachedOWRigidbody().Unsuspend();
+                item.GetAttachedOWRigidbody().Invoke("UnsuspendImmediate", true);
+            }
+            else
+            {
+                item.GetAttachedOWRigidbody().Suspend();
+            }
+        }
     }
+
+
+
+    /*
+     * anglerfishAnglerfish_Body (OWRigidbody)	Hard Mode	
+    anglerfishAnglerfish_Body (AnglerfishController)	Hard Mode	
+    anglerfishAnglerfish_Body (ImpactSensor)	Hard Mode	
+    anglerfishAnglerfish_Body (NoiseSensor)	Hard Mode	
+    anglerfishAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+    anglerfishAudioController (AnglerfishAudioController)	Hard Mode	
+    anglerfishLoopSource (OWAudioSource)	Hard Mode
+    anglerfishOneShotSource (OWAudioSource)	Hard Mode	
+anglerfishOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfishJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfishJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfishJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfishBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfishLure_PointLight (LightLOD)	Hard Mode	
+anglerfishLure_FogLight (FogLight)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfishBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode
+    anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode
+    anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode
+    anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAnglerfish_Body (OWRigidbody)	Hard Mode	
+anglerfish-childAnglerfish_Body (AnglerfishController)	Hard Mode	
+anglerfish-childAnglerfish_Body (ImpactSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (NoiseSensor)	Hard Mode	
+anglerfish-childAnglerfish_Body (CenterOfTheUniverseOffsetApplier)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childAudioController (AnglerfishAudioController)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	
+anglerfish-childLoopSource (OWAudioSource)	Hard Mode	3
+anglerfish-childOneShotSource (OWAudioSource)	Hard Mode	3
+anglerfish-childOneShotSource_LongRange (OWAudioSource)	Hard Mode	3
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (AnglerfishFluidVolume)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWCollider)	Hard Mode	
+anglerfish-childJawsOfDestruction (OWTriggerVolume)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childBeast_Anglerfish (AnglerfishAnimController)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	
+anglerfish-childLure_PointLight (LightLOD)	Hard Mode	3
+anglerfish-childLure_FogLight (FogLight)	Hard Mode	2
+anglerfish-childBeast_Anglerfish_Collider_Mouth (OWCollider)	Hard Mode	4
+anglerfish-childBeast_Anglerfish (StreamingSkinnedMeshHandle)	Hard Mode	3
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	
+anglerfish-childBeast_Anglerfish_Collider_Body (OWCollider)	Hard Mode	3
+anglerfish-childBeast_Anglerfish_Collider_LeftCheek (OWCollider)	Hard Mode	3
+anglerfish-childBeast_Anglerfish_Collider_MouthFloor (OWCollider)	Hard Mode	3
+anglerfish-childBeast_Anglerfish_Collider_RightCheek (OWCollider)	Hard Mode	3
+parentFogLight_FishEgg (FogLight)	Hard Mode
+
+     */
 }

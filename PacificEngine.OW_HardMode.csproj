@@ -50,6 +50,9 @@
     <Reference Include="UnityEngine">
       <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
@@ -58,6 +61,12 @@
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
@@ -77,6 +86,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Inputs.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Sector.cs" />
     <Compile Include="Ship.cs" />
     <Compile Include="SuperNova.cs" />
   </ItemGroup>

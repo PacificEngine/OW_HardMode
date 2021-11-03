@@ -57,6 +57,7 @@ namespace ClassLibrary2
         {
             isEnabled = config.Enabled;
 
+
             SuperNova.maxDuration = getConfigOrDefault<float>(config, "Loop Duration", 1320f);
             damageMultiplier = getConfigOrDefault<float>(config, "Damage Multiplier", 1f);
             Player.maxFuelSeconds = getConfigOrDefault<float>(config, "Fuel Percentage", 100f);
@@ -156,6 +157,11 @@ namespace ClassLibrary2
         {
             Anglerfish.Awake();
 
+            foreach (Sector sector in SectorManager.GetRegisteredSectors())
+            {
+                sector.OnOccupantEnterSector += (occupant) => ModHelper.Console.WriteLine("Sector Entered: " + sector.GetName());
+                sector.OnOccupantExitSector += (occupant) => ModHelper.Console.WriteLine("Sector Exited: " + sector.GetName());
+            }
             ModHelper.Console.WriteLine("Hard Mode: Player Awakes");
         }
 
