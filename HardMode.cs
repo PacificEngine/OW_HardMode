@@ -57,7 +57,7 @@ namespace PacificEngine.OW_HardMode
                 damageMultiplier = Config.getConfigOrDefault<float>(config, "Damage Multiplier", 1f);
                 Player.maxFuelSeconds = Config.getConfigOrDefault<float>(config, "Fuel Percentage", 100f);
                 Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
-                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "Oxygen Percentage", 100f) * 45f;
+                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "Oxygen Percentage", 100f) * 4.5f;
                 Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
                 Ship.maxFuelSeconds = Config.getConfigOrDefault<bool>(config, "Disable Ship", false) ? 0f : Ship.maxFuelSeconds;
 
