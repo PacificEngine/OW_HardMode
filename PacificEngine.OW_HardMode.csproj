@@ -29,7 +29,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>OW_HardMode</AssemblyName>
+    <AssemblyName>$(ProjectName)</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <!--<OuterWildsRootDirectory>%OuterWilds%\Outer Wilds</OuterWildsRootDirectory>-->
     <!--<OuterWildsModsDirectory>%AppData%\OuterWildsModManager\OWML\Mods</OuterWildsModsDirectory>-->
@@ -74,6 +74,9 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>$(OuterWildsRootDirectory)\OuterWilds_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="PacificEngine.OW_CommonResourcesMod">
+      <HintPath>$(OuterWildsModsDirectory)\PacificEngine.OW_CommonResourcesMod\PacificEngine.OW_CommonResourcesMod.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -82,13 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Anglerfish.cs" />
-    <Compile Include="Class1.cs" />
-    <Compile Include="Inputs.cs" />
-    <Compile Include="Player.cs" />
-    <Compile Include="Sector.cs" />
-    <Compile Include="Ship.cs" />
-    <Compile Include="SuperNova.cs" />
+    <Compile Include="HardMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

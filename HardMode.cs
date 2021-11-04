@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using PacificEngine.OW_CommonResourcesMod;
 
-namespace ClassLibrary2
+namespace PacificEngine.OW_HardMode
 {
     public class MainClass : ModBehaviour
     {
@@ -20,61 +21,74 @@ namespace ClassLibrary2
             if (isEnabled)
             {
                 ModHelper.Events.Player.OnPlayerAwake += (player) => onAwake();
-                Anglerfish.Start((ModHelper)ModHelper);
                 ModHelper.Console.WriteLine("Hard Mode: ready!");
             }
         }
 
         void Destory()
         {
-            Anglerfish.Destroy((ModHelper)ModHelper);
             ModHelper.Console.WriteLine("Hard Mode: clean up!");
-        }
-
-        private T getConfigOrDefault<T>(IModConfig config, string id, T defaultValue)
-        {
-            try
-            {
-                var sValue = config.GetSettingsValue<T>(id);
-                if (sValue == null)
-                {
-                    throw new NullReferenceException(id);
-                }
-                if (sValue is string && ((string)(object)sValue).Length < 1)
-                {
-                    throw new NullReferenceException(id);
-                }
-                return sValue;
-            }
-            catch (Exception e)
-            {
-                config.SetSettingsValue(id, defaultValue);
-                return defaultValue;
-            };
         }
 
         public override void Configure(IModConfig config)
         {
             isEnabled = config.Enabled;
 
+            if (!isEnabled)
+            {
+                SuperNova.maximum = 1320f;
+                damageMultiplier = 1f;
+                Player.maxFuelSeconds = 100f;
+                Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
+                Player.maxOxygenSeconds = 450f;
+                Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
 
-            SuperNova.maxDuration = getConfigOrDefault<float>(config, "Loop Duration", 1320f);
-            damageMultiplier = getConfigOrDefault<float>(config, "Damage Multiplier", 1f);
-            Player.maxFuelSeconds = getConfigOrDefault<float>(config, "Fuel Percentage", 100f);
-            Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
-            Player.maxOxygenSeconds = getConfigOrDefault<float>(config, "Oxygen Percentage", 100f) * 45f;
-            Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
-            Ship.maxFuelSeconds = getConfigOrDefault<bool>(config, "Disable Ship", false) ? 0f : Ship.maxFuelSeconds;
-            var anglerSpeedMultiplier = getConfigOrDefault<float>(config, "Anglerfish Speed Multiplier", 1f);
-            var anglerDetectMultiplier = getConfigOrDefault<float>(config, "Anglerfish Detection Multiplier", 1f);
+                Anglerfish.canStun = true;
+                Anglerfish.canSmell = false;
+                Anglerfish.canSee = false;
 
-            Anglerfish.canStun = getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true);
-            Anglerfish.canSmell = getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false);
-            Anglerfish.canSee = getConfigOrDefault<bool>(config, "Anglerfish Can See", false);
+                var anglerSpeedMultiplier = 1f;
+                var anglerDetectMultiplier = 1f;
+                updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
+            }
+            else
+            {
+                SuperNova.maximum = Config.getConfigOrDefault<float>(config, "Loop Duration", 1320f);
+                damageMultiplier = Config.getConfigOrDefault<float>(config, "Damage Multiplier", 1f);
+                Player.maxFuelSeconds = Config.getConfigOrDefault<float>(config, "Fuel Percentage", 100f);
+                Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
+                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "Oxygen Percentage", 100f) * 45f;
+                Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
+                Ship.maxFuelSeconds = Config.getConfigOrDefault<bool>(config, "Disable Ship", false) ? 0f : Ship.maxFuelSeconds;
 
-            updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
+                Anglerfish.canStun = Config.getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true);
+                Anglerfish.canSmell = Config.getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false);
+                Anglerfish.canSee = Config.getConfigOrDefault<bool>(config, "Anglerfish Can See", false);
+
+                var anglerSpeedMultiplier = Config.getConfigOrDefault<float>(config, "Anglerfish Speed Multiplier", 1f);
+                var anglerDetectMultiplier = Config.getConfigOrDefault<float>(config, "Anglerfish Detection Multiplier", 1f);
+                updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
+            }
+
 
             ModHelper.Console.WriteLine("Hard Mode: Configured!");
+        }
+
+        void OnGUI()
+        {
+        }
+
+        void onAwake()
+        {
+            ModHelper.Console.WriteLine("Hard Mode: Player Awakes");
+        }
+
+        void Update()
+        {
+            if (isEnabled)
+            {
+                updateHealth(damageMultiplier);
+            }
         }
 
         private float anglerFishSpeedAdjustment(float anglerSpeedMultiplier)
@@ -146,35 +160,6 @@ namespace ClassLibrary2
             else
             {
                 return anglerDetectMultiplier * 1000f; // 11000
-            }
-        }
-
-        void OnGUI()
-        {
-        }
-
-        void onAwake()
-        {
-            Anglerfish.Awake();
-
-            foreach (Sector sector in SectorManager.GetRegisteredSectors())
-            {
-                sector.OnOccupantEnterSector += (occupant) => ModHelper.Console.WriteLine("Sector Entered: " + sector.GetName());
-                sector.OnOccupantExitSector += (occupant) => ModHelper.Console.WriteLine("Sector Exited: " + sector.GetName());
-            }
-            ModHelper.Console.WriteLine("Hard Mode: Player Awakes");
-        }
-
-        void Update()
-        {
-            if (isEnabled)
-            {
-                Player.Update();
-                Ship.Update();
-                Anglerfish.Update();
-                SuperNova.Update();
-
-                updateHealth(damageMultiplier);
             }
         }
 
