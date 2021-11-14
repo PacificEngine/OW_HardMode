@@ -36,42 +36,212 @@ namespace PacificEngine.OW_HardMode
         {
             isEnabled = config.Enabled;
 
+            var difficulty = Config.getConfigOrDefault<String>(config, "DifficultySettings", "Hard");
             if (!isEnabled)
             {
-                SuperNova.maximum = 1320f;
-                damageMultiplier = 1f;
-                Player.maxFuelSeconds = 100f;
-                Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
-                Player.maxOxygenSeconds = 450f;
-                Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
+                difficulty = "Medium";
+            }
+
+            if ("Peaceful".Equals(difficulty))
+            {
+                SuperNova.maximum = 2640f;
+                damageMultiplier = 0.00001f;
+                Player.maxBoostSeconds = 10f;
+                Player.maxFuelSeconds = 1000f;
+                Player.maxOxygenSeconds = 4500f;
+                Ship.maxFuelSeconds = 100000f;
+                Ship.maxOxygenSeconds = 60000f;
 
                 Anglerfish.canStun = true;
+                Anglerfish.canFeel = false;
+                Anglerfish.canHear = false;
                 Anglerfish.canSmell = false;
                 Anglerfish.canSee = false;
+                Anglerfish.mouthOpenDistance = 0f;
+                Anglerfish.pursueDistance = 0f;
+                Anglerfish.escapeDistance = 0f;
+                Anglerfish.acceleration = 2f;
+                Anglerfish.investigateSpeed = 0f;
+                Anglerfish.chaseSpeed = 0f;
+                Anglerfish.turnSpeed = 0f;
+                Anglerfish.quickTurnSpeed = 0f;
+                Anglerfish.smellDistance = 0f;
+                Anglerfish.visionDistance = 0f;
 
-                var anglerSpeedMultiplier = 1f;
-                var anglerDetectMultiplier = 1f;
-                updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
+                Inhabitants.enabledHostility = false;
+            }
+            else if ("Easy".Equals(difficulty))
+            {
+                SuperNova.maximum = 1620f;
+                damageMultiplier = 0.1f;
+                Player.maxBoostSeconds = 5f;
+                Player.maxFuelSeconds = 250f;
+                Player.maxOxygenSeconds = 450f;
+                Ship.maxFuelSeconds = 10000f;
+                Ship.maxOxygenSeconds = 6000f;
+
+                Anglerfish.canStun = true;
+                Anglerfish.canFeel = true;
+                Anglerfish.canHear = true;
+                Anglerfish.canSmell = false;
+                Anglerfish.canSee = false;
+                Anglerfish.mouthOpenDistance = 100f;
+                Anglerfish.pursueDistance = 150f;
+                Anglerfish.escapeDistance = 300f;
+                Anglerfish.acceleration = 1f;
+                Anglerfish.investigateSpeed = 10f;
+                Anglerfish.chaseSpeed = 21f;
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = 0f;
+                Anglerfish.visionDistance = 0f;
+
+                Inhabitants.enabledHostility = true;
+            }
+            else if ("Standard".Equals(difficulty))
+            {
+                SuperNova.maximum = 1320f;
+                damageMultiplier = 0.1f;
+                Player.maxBoostSeconds = 5f;
+                Player.maxFuelSeconds = 250f;
+                Player.maxOxygenSeconds = 450f;
+                Ship.maxFuelSeconds = 10000f;
+                Ship.maxOxygenSeconds = 6000f;
+
+                Anglerfish.canStun = true;
+                Anglerfish.canFeel = true;
+                Anglerfish.canHear = true;
+                Anglerfish.canSmell = false;
+                Anglerfish.canSee = false;
+                Anglerfish.mouthOpenDistance = 100f;
+                Anglerfish.pursueDistance = 200f;
+                Anglerfish.escapeDistance = 500f;
+                Anglerfish.acceleration = 2f;
+                Anglerfish.investigateSpeed = 20f;
+                Anglerfish.chaseSpeed = 42f;
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = 0f;
+                Anglerfish.visionDistance = 0f;
+
+                Inhabitants.enabledHostility = true;
+            }
+            else if ("Hard".Equals(difficulty))
+            {
+                SuperNova.maximum = 1020f;
+                damageMultiplier = 2f;
+                Player.maxBoostSeconds = 1f;
+                Player.maxFuelSeconds = 50f;
+                Player.maxOxygenSeconds = 200f;
+                Ship.maxFuelSeconds = 1000f;
+                Ship.maxOxygenSeconds = 600f;
+
+                Anglerfish.canStun = true;
+                Anglerfish.canFeel = true;
+                Anglerfish.canHear = true;
+                Anglerfish.canSmell = false;
+                Anglerfish.canSee = false;
+                Anglerfish.mouthOpenDistance = 300f;
+                Anglerfish.pursueDistance = 600f;
+                Anglerfish.escapeDistance = 1500f;
+                Anglerfish.acceleration = 6f;
+                Anglerfish.investigateSpeed = 50f;
+                Anglerfish.chaseSpeed = 110f;
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = 0f;
+                Anglerfish.visionDistance = 0f;
+
+                Inhabitants.enabledHostility = true;
+            }
+            else if ("Ridiculous".Equals(difficulty))
+            {
+                SuperNova.maximum = 600f;
+                damageMultiplier = 4f;
+                Player.maxBoostSeconds = 0.5f;
+                Player.maxFuelSeconds = 25f;
+                Player.maxOxygenSeconds = 150f;
+                Ship.maxFuelSeconds = 1000f;
+                Ship.maxOxygenSeconds = 600f;
+
+                Anglerfish.canStun = true;
+                Anglerfish.canFeel = true;
+                Anglerfish.canHear = true;
+                Anglerfish.canSmell = true;
+                Anglerfish.canSee = false;
+                Anglerfish.mouthOpenDistance = 300f;
+                Anglerfish.pursueDistance = 1200f;
+                Anglerfish.escapeDistance = 3000f;
+                Anglerfish.acceleration = 6f;
+                Anglerfish.investigateSpeed = 50f;
+                Anglerfish.chaseSpeed = 110f;
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = 1000f;
+                Anglerfish.visionDistance = 0f;
+
+                Inhabitants.enabledHostility = true;
+            }
+            else if ("Improbable".Equals(difficulty))
+            {
+                SuperNova.maximum = 450f;
+                damageMultiplier = 10f;
+                Player.maxBoostSeconds = 0.1f;
+                Player.maxFuelSeconds = 10f;
+                Player.maxOxygenSeconds = 100f;
+                Ship.maxFuelSeconds = 500f;
+                Ship.maxOxygenSeconds = 300f;
+
+                Anglerfish.canStun = true;
+                Anglerfish.canFeel = true;
+                Anglerfish.canHear = true;
+                Anglerfish.canSmell = true;
+                Anglerfish.canSee = true;
+                Anglerfish.mouthOpenDistance = 300f;
+                Anglerfish.pursueDistance = 2400f;
+                Anglerfish.escapeDistance = 6000f;
+                Anglerfish.acceleration = 20f;
+                Anglerfish.investigateSpeed = 100f;
+                Anglerfish.chaseSpeed = 200f;
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = 600f;
+                Anglerfish.visionDistance = 1000f;
+
+                Inhabitants.enabledHostility = true;
             }
             else
             {
-                SuperNova.maximum = Config.getConfigOrDefault<float>(config, "Loop Duration", 1320f);
-                damageMultiplier = Config.getConfigOrDefault<float>(config, "Damage Multiplier", 1f);
-                Player.maxFuelSeconds = Config.getConfigOrDefault<float>(config, "Fuel Percentage", 100f);
-                Ship.maxFuelSeconds = Player.maxFuelSeconds * 100f;
-                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "Oxygen Percentage", 100f) * 4.5f;
-                Ship.maxOxygenSeconds = Player.maxOxygenSeconds * (600f / 45f);
-                Ship.maxFuelSeconds = Config.getConfigOrDefault<bool>(config, "Disable Ship", false) ? 0f : Ship.maxFuelSeconds;
+                SuperNova.maximum = Config.getConfigOrDefault<float>(config, "LoopDuration", 1320f);
+                damageMultiplier = Config.getConfigOrDefault<float>(config, "DamageMultiplier", 1320f);
+                Player.maxBoostSeconds = Config.getConfigOrDefault<float>(config, "BoostSeconds", 1f);
+                Player.maxFuelSeconds = Config.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
+                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
+                Ship.maxFuelSeconds = Config.getConfigOrDefault<bool>(config, "DisableShip", false) ? Config.getConfigOrDefault<float>(config, "ShipFuel", 10000f) : 0f;
+                Ship.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "ShipOxygen", 6000f);
 
-                Anglerfish.canStun = Config.getConfigOrDefault<bool>(config, "Anglerfish Can Forget", true);
-                Anglerfish.canSmell = Config.getConfigOrDefault<bool>(config, "Anglerfish Can Smell", false);
-                Anglerfish.canSee = Config.getConfigOrDefault<bool>(config, "Anglerfish Can See", false);
+                Anglerfish.pursueDistance = Config.getConfigOrDefault<float>(config, "AnglerfishHearingRange", 200f);
+                Anglerfish.escapeDistance = Config.getConfigOrDefault<float>(config, "AnglerfishFeelingRange", 500f);
+                Anglerfish.acceleration = Config.getConfigOrDefault<float>(config, "AnglerfisAcceleration", 2f);
+                Anglerfish.chaseSpeed = Config.getConfigOrDefault<float>(config, "AnglerfisChaseSpeed", 42f);
+                Anglerfish.turnSpeed = 100f;
+                Anglerfish.quickTurnSpeed = 360f;
+                Anglerfish.smellDistance = Config.getConfigOrDefault<float>(config, "AnglerfisSmellingRange", 0f);
+                Anglerfish.visionDistance = Config.getConfigOrDefault<float>(config, "AnglerfisSeeingRange", 0f);
 
-                var anglerSpeedMultiplier = Config.getConfigOrDefault<float>(config, "Anglerfish Speed Multiplier", 1f);
-                var anglerDetectMultiplier = Config.getConfigOrDefault<float>(config, "Anglerfish Detection Multiplier", 1f);
-                updateAnglerFish(anglerFishSpeedAdjustment(anglerSpeedMultiplier), anglerFishDistanceAdjustment(anglerDetectMultiplier));
+                Anglerfish.canStun = Config.getConfigOrDefault<bool>(config, "AnglerfishAreLikeGoldfish", true);
+                Anglerfish.canFeel = Anglerfish.pursueDistance > 1f;
+                Anglerfish.canHear = Anglerfish.escapeDistance > 1f;
+                Anglerfish.canSmell = Anglerfish.smellDistance > 1f;
+                Anglerfish.canSee = Anglerfish.visionDistance > 1f;
+                Anglerfish.mouthOpenDistance = Anglerfish.pursueDistance / 2f;
+                Anglerfish.investigateSpeed = Anglerfish.chaseSpeed / 2f;
+
+                Anglerfish.escapeDistance = Mathf.Max(Anglerfish.escapeDistance.Value, Anglerfish.smellDistance.Value, Anglerfish.visionDistance.Value);
+                Anglerfish.pursueDistance = Mathf.Max(Anglerfish.pursueDistance.Value, Anglerfish.smellDistance.Value, Anglerfish.visionDistance.Value);
+
+                Inhabitants.enabledHostility = Config.getConfigOrDefault<bool>(config, "InhabitantsCanAttackPlayer", true);
             }
-
 
             ModHelper.Console.WriteLine("Hard Mode: Configured!");
         }
@@ -91,94 +261,6 @@ namespace PacificEngine.OW_HardMode
             {
                 updateHealth(damageMultiplier);
             }
-        }
-
-        private float anglerFishSpeedAdjustment(float anglerSpeedMultiplier)
-        {
-            if (anglerSpeedMultiplier <= 5f)
-            {
-                return anglerSpeedMultiplier; // 1, 2, 3, 4, 5
-            }
-            else if (anglerSpeedMultiplier <= 6f)
-            {
-                return anglerSpeedMultiplier * 1.17f; // 7
-            }
-            else if (anglerSpeedMultiplier <= 7f)
-            {
-                return anglerSpeedMultiplier * 1.42f; // 10
-            }
-            else if (anglerSpeedMultiplier <= 8f)
-            {
-                return anglerSpeedMultiplier * 1.7f; // 14
-            }
-            else if (anglerSpeedMultiplier <= 9f)
-            {
-                return anglerSpeedMultiplier * 2f; // 18
-            }
-            else if (anglerSpeedMultiplier <= 10f)
-            {
-                return anglerSpeedMultiplier * 2.5f; // 25
-            }
-            else
-            {
-                return anglerSpeedMultiplier * 10f; // 110
-            }
-        }
-
-        private float anglerFishDistanceAdjustment(float anglerDetectMultiplier)
-        {
-            if (anglerDetectMultiplier <= 3f)
-            {
-                return anglerDetectMultiplier; // 1, 2, 3
-            }
-            else if (anglerDetectMultiplier <= 4f)
-            {
-                return anglerDetectMultiplier * 1.17f; // 5
-            }
-            else if (anglerDetectMultiplier <= 5f)
-            {
-                return anglerDetectMultiplier * 2f; // 10
-            }
-            else if (anglerDetectMultiplier <= 6f)
-            {
-                return anglerDetectMultiplier * 4f; // 25
-            }
-            else if (anglerDetectMultiplier <= 7f)
-            {
-                return anglerDetectMultiplier * 7f; // 50
-            }
-            else if (anglerDetectMultiplier <= 8f)
-            {
-                return anglerDetectMultiplier * 12.5f; // 100
-            }
-            else if (anglerDetectMultiplier <= 9f)
-            {
-                return anglerDetectMultiplier * 50f; // 450
-            }
-            else if (anglerDetectMultiplier <= 10f)
-            {
-                return anglerDetectMultiplier * 100f; // 1000
-            }
-            else
-            {
-                return anglerDetectMultiplier * 1000f; // 11000
-            }
-        }
-
-        private void updateAnglerFish(float speedMultiplier, float detectMultiplier)
-        {
-            Anglerfish.mouthOpenDistance = 100f * detectMultiplier;
-            Anglerfish.pursueDistance = 200f * detectMultiplier;
-            Anglerfish.escapeDistance = 500f * detectMultiplier;
-
-            Anglerfish.acceleration = 2f * speedMultiplier;
-            Anglerfish.investigateSpeed = 20f * speedMultiplier;
-            Anglerfish.chaseSpeed = 42f * speedMultiplier;
-            Anglerfish.turnSpeed = 100f * speedMultiplier;
-            Anglerfish.quickTurnSpeed = 360f * speedMultiplier;
-
-            Anglerfish.visionDistance = 200f * detectMultiplier;
-            Anglerfish.smellDistance = 500f * detectMultiplier;
         }
 
         private void updateHealth(float damageMultiplier)

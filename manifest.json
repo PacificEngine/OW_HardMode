@@ -1,10 +1,10 @@
 {
 	"filename": "PacificEngine.OW_HardMode.dll",
 	"author": "PacificEngine",
-	"name": "Hard Mode",
+	"name": "Difficulty Mode",
 	"uniqueName": "PacificEngine.OW_HardMode",
-	"version": "0.2.2",
-	"owmlVersion": "2.1.0",
+	"version": "0.2.4",
+	"owmlVersion": "2.2.0",
 	"dependencies": [ "PacificEngine.OW_CommonResources" ],
 	"enabled": true
 }

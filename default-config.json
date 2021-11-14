@@ -2,69 +2,105 @@
   "enabled": true,
   "requireVR": false,
   "settings": {
-    "Damage Multiplier": {
-      "type": "slider",
-      "value": 1,
-      "min": 1,
-      "max": 11
+    "DifficultySettings": {
+      "title": "Difficulty Settings",
+      "type": "selector",
+      "value": "Hard",
+      "options": [
+        "Peaceful",
+        "Easy",
+        "Standard",
+        "Hard",
+        "Ridiculous",
+        "Improbable",
+        "Custom"
+      ]
     },
-    "Fuel Percentage": {
-      "type": "slider",
-      "value": 100,
-      "min": 0,
-      "max": 100
+    "DamageMultiplier": {
+      "title": "Damage Multiplier",
+      "type": "number",
+      "value": 1
     },
-    "Oxygen Percentage": {
-      "type": "slider",
-      "value": 100,
-      "min": 0,
-      "max": 100
+    "BoostSeconds": {
+      "title": "Boost Seconds",
+      "type": "number",
+      "value": 1
     },
-    "Loop Duration": {
-      "type": "slider",
-      "value": 1300,
-      "min": 300,
-      "max": 1300
+    "JetPackFuel": {
+      "title": "Jetpack Fuel",
+      "type": "number",
+      "value": 100
     },
-    "Disable Ship": {
+    "ShipFuel": {
+      "title": "Ship Fuel",
+      "type": "number",
+      "value": 10000
+    },
+    "PlayerOxygen": {
+      "title": "Player Oxygen",
+      "type": "number",
+      "value": 450
+    },
+    "ShipOxygen": {
+      "title": "Ship Oxygen",
+      "type": "number",
+      "value": 6000
+    },
+    "LoopDuration": {
+      "title": "Loop Duration",
+      "type": "number",
+      "value": 1320
+    },
+    "DisableShip": {
       "type": "toggle",
       "value": false,
       "yes": "Disabled",
       "no": "Enabled",
       "title": "Disable Ship"
     },
-    "Anglerfish Speed Multiplier": {
-      "type": "slider",
-      "value": 1,
-      "min": 1,
-      "max": 11
-    },
-    "Anglerfish Detection Multiplier": {
-      "type": "slider",
-      "value": 1,
-      "min": 1,
-      "max": 11
-    },
-    "Anglerfish Can Forget": {
+    "AnglerfishAreLikeGoldfish": {
       "type": "toggle",
       "value": true,
       "yes": "Enabled",
       "no": "Disabled",
       "title": "Anglerfish Can Forget"
     },
-    "Anglerfish Can Smell": {
-      "type": "toggle",
-      "value": false,
-      "yes": "Enabled",
-      "no": "Disabled",
-      "title": "Anglerfish Can Smell"
+    "AnglerfishFeelingRange": {
+      "title": "Anglerfish Feeling Distance",
+      "type": "number",
+      "value": 500
     },
-    "Anglerfish Can See": {
+    "AnglerfishHearingRange": {
+      "title": "Anglerfish Hearing Distance",
+      "type": "number",
+      "value": 200
+    },
+    "AnglerfisSmellingRange": {
+      "title": "Anglerfish Smell Distance",
+      "type": "number",
+      "value": 0
+    },
+    "AnglerfisSeeingRange": {
+      "title": "Anglerfish Seeing Distance",
+      "type": "number",
+      "value": 0
+    },
+    "AnglerfisAcceleration": {
+      "title": "Anglerfish Acceleration",
+      "type": "number",
+      "value": 2
+    },
+    "AnglerfisChaseSpeed": {
+      "title": "Anglerfish Maximum Speed",
+      "type": "number",
+      "value": 42
+    },
+    "InhabitantsCanAttackPlayer": {
       "type": "toggle",
-      "value": false,
+      "value": true,
       "yes": "Enabled",
       "no": "Disabled",
-      "title": "Anglerfish Can See"
+      "title": "Inhabitants Hostility"
     }
   }
 }
