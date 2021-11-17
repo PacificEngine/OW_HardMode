@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 using PacificEngine.OW_CommonResources.Game.State;
 using PacificEngine.OW_CommonResources.Game.Player;
 using PacificEngine.OW_CommonResources;
+using PacificEngine.OW_CommonResources.Config;
 
 namespace PacificEngine.OW_HardMode
 {
@@ -36,7 +37,7 @@ namespace PacificEngine.OW_HardMode
         {
             isEnabled = config.Enabled;
 
-            var difficulty = Config.getConfigOrDefault<String>(config, "DifficultySettings", "Hard");
+            var difficulty = ConfigHelper.getConfigOrDefault<String>(config, "DifficultySettings", "Hard");
             if (!isEnabled)
             {
                 difficulty = "Medium";
@@ -212,24 +213,24 @@ namespace PacificEngine.OW_HardMode
             }
             else
             {
-                SuperNova.maximum = Config.getConfigOrDefault<float>(config, "LoopDuration", 1320f);
-                damageMultiplier = Config.getConfigOrDefault<float>(config, "DamageMultiplier", 1320f);
-                Player.maxBoostSeconds = Config.getConfigOrDefault<float>(config, "BoostSeconds", 1f);
-                Player.maxFuelSeconds = Config.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
-                Player.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
-                Ship.maxFuelSeconds = Config.getConfigOrDefault<bool>(config, "DisableShip", false) ? Config.getConfigOrDefault<float>(config, "ShipFuel", 10000f) : 0f;
-                Ship.maxOxygenSeconds = Config.getConfigOrDefault<float>(config, "ShipOxygen", 6000f);
+                SuperNova.maximum = ConfigHelper.getConfigOrDefault<float>(config, "LoopDuration", 1320f);
+                damageMultiplier = ConfigHelper.getConfigOrDefault<float>(config, "DamageMultiplier", 1320f);
+                Player.maxBoostSeconds = ConfigHelper.getConfigOrDefault<float>(config, "BoostSeconds", 1f);
+                Player.maxFuelSeconds = ConfigHelper.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
+                Player.maxOxygenSeconds = ConfigHelper.getConfigOrDefault<float>(config, "JetPackFuel", 100f);
+                Ship.maxFuelSeconds = ConfigHelper.getConfigOrDefault<bool>(config, "DisableShip", false) ? ConfigHelper.getConfigOrDefault<float>(config, "ShipFuel", 10000f) : 0f;
+                Ship.maxOxygenSeconds = ConfigHelper.getConfigOrDefault<float>(config, "ShipOxygen", 6000f);
 
-                Anglerfish.pursueDistance = Config.getConfigOrDefault<float>(config, "AnglerfishHearingRange", 200f);
-                Anglerfish.escapeDistance = Config.getConfigOrDefault<float>(config, "AnglerfishFeelingRange", 500f);
-                Anglerfish.acceleration = Config.getConfigOrDefault<float>(config, "AnglerfisAcceleration", 2f);
-                Anglerfish.chaseSpeed = Config.getConfigOrDefault<float>(config, "AnglerfisChaseSpeed", 42f);
+                Anglerfish.pursueDistance = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfishHearingRange", 200f);
+                Anglerfish.escapeDistance = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfishFeelingRange", 500f);
+                Anglerfish.acceleration = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfisAcceleration", 2f);
+                Anglerfish.chaseSpeed = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfisChaseSpeed", 42f);
                 Anglerfish.turnSpeed = 100f;
                 Anglerfish.quickTurnSpeed = 360f;
-                Anglerfish.smellDistance = Config.getConfigOrDefault<float>(config, "AnglerfisSmellingRange", 0f);
-                Anglerfish.visionDistance = Config.getConfigOrDefault<float>(config, "AnglerfisSeeingRange", 0f);
+                Anglerfish.smellDistance = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfisSmellingRange", 0f);
+                Anglerfish.visionDistance = ConfigHelper.getConfigOrDefault<float>(config, "AnglerfisSeeingRange", 0f);
 
-                Anglerfish.canStun = Config.getConfigOrDefault<bool>(config, "AnglerfishAreLikeGoldfish", true);
+                Anglerfish.canStun = ConfigHelper.getConfigOrDefault<bool>(config, "AnglerfishAreLikeGoldfish", true);
                 Anglerfish.canFeel = Anglerfish.pursueDistance > 1f;
                 Anglerfish.canHear = Anglerfish.escapeDistance > 1f;
                 Anglerfish.canSmell = Anglerfish.smellDistance > 1f;
@@ -240,7 +241,7 @@ namespace PacificEngine.OW_HardMode
                 Anglerfish.escapeDistance = Mathf.Max(Anglerfish.escapeDistance.Value, Anglerfish.smellDistance.Value, Anglerfish.visionDistance.Value);
                 Anglerfish.pursueDistance = Mathf.Max(Anglerfish.pursueDistance.Value, Anglerfish.smellDistance.Value, Anglerfish.visionDistance.Value);
 
-                Inhabitants.enabledHostility = Config.getConfigOrDefault<bool>(config, "InhabitantsCanAttackPlayer", true);
+                Inhabitants.enabledHostility = ConfigHelper.getConfigOrDefault<bool>(config, "InhabitantsCanAttackPlayer", true);
             }
 
             ModHelper.Console.WriteLine("Hard Mode: Configured!");
