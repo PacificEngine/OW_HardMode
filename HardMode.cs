@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using PacificEngine.OW_CommonResources;
 using PacificEngine.OW_CommonResources.Game.State;
 using PacificEngine.OW_CommonResources.Game.Player;
-using PacificEngine.OW_CommonResources;
-using PacificEngine.OW_CommonResources.Config;
+using PacificEngine.OW_CommonResources.Game.Config;
 
 namespace PacificEngine.OW_HardMode
 {
@@ -40,7 +40,7 @@ namespace PacificEngine.OW_HardMode
             var difficulty = ConfigHelper.getConfigOrDefault<String>(config, "DifficultySettings", "Hard");
             if (!isEnabled)
             {
-                difficulty = "Medium";
+                difficulty = "Standard";
             }
 
             if ("Peaceful".Equals(difficulty))
