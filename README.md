@@ -1,9 +1,11 @@
-# Installing the Mod
-1) Download and install https://outerwildsmods.com/
-1) From the Application Install `PacificEngine's Common Resources`
-1) From the Application Install `Difficulty Mod`
+# Randomizer Mod by Pacific Engine
 
-# Using the Mod
+## Installing the Mod
+1) Download and Install https://outerwildsmods.com/
+1) From the Application, Install `PacificEngine's Common Resources` by `PacificEngine`
+1) From the Application, Install `Difficulty Mod` by `PacificEngine`
+
+## Using the Mod
 All mod features can be configured in settings.
 
 Includes:
@@ -18,7 +20,7 @@ Includes:
 * Giving Anglerfish the ability to smell you or your ship
 * Giving Anglerfish the ability see you or your ship (Good luck!)
 
-# Creating Code
+## Creating Code
 Create a new file called `PacificEngine.OW_HardMode.csproj.user`
 ```text/xml
 <?xml version="1.0" encoding="utf-8"?>
