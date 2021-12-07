@@ -1,3 +1,8 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/PacificEngine/OW_HardMode?style=flat-square)
+![GitHub Release Date](https://img.shields.io/github/release-date/PacificEngine/OW_HardMode?label=last%20release&style=flat-square)
+![GitHub all releases](https://img.shields.io/github/downloads/PacificEngine/OW_HardMode/total?style=flat-square)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/PacificEngine/OW_HardMode/latest/total?style=flat-square)
+
 # Randomizer Mod by Pacific Engine
 
 ## Installing the Mod
