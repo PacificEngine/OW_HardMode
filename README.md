@@ -3,7 +3,7 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/PacificEngine/OW_HardMode/total?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/downloads/PacificEngine/OW_HardMode/latest/total?style=flat-square)
 
-# Randomizer Mod by Pacific Engine
+# Difficulty Mod by Pacific Engine
 
 ## Installing the Mod
 1) Download and Install https://outerwildsmods.com/
